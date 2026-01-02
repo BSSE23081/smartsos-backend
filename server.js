@@ -1,4 +1,5 @@
 // server.js
+const path = require('path');
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -8,6 +9,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// serve built frontend
+app.use(express.static(path.join(__dirname, 'frontend')));
+
+// health + db-test APIs
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
@@ -43,6 +48,11 @@ app.post('/api/incidents', async (req, res) => {
     console.error('INCIDENT ERROR:', err);
     res.status(500).json({ error: 'could not create incident' });
   }
+});
+
+// fallback to index.html for SPA routes
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'frontend', 'index.html'));
 });
 
 const PORT = process.env.API_PORT || 4000;
